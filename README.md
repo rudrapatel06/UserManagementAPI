@@ -20,6 +20,10 @@ A simple ASP.NET Core Web API for managing users. Supports CRUD operations with 
 - Helped debug null reference issues
 - Added `CreatedAtAction` for POST responses
 
+## 🧪 Testing
+Import `Tests/UserManagementAPI.postman_collection.json` into Postman to test all CRUD endpoints automatically.
+
+
 ## ▶️ Run Locally
 ```bash
 dotnet build
