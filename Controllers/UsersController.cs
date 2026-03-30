@@ -1,79 +1,53 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using UserManagementAPI.Models;
 
 namespace UserManagementAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private static List<User> users = new List<User>();
-        private static int nextId = 1;
+        private static List<User> users = new();
 
-        // GET: api/users
         [HttpGet]
-        public ActionResult<List<User>> GetAllUsers()
-        {
-            return users;
-        }
+        public IActionResult GetAll() => Ok(users);
 
-        // GET: api/users/{id}
         [HttpGet("{id}")]
-        public ActionResult<User> GetUserById(int id)
-        {
-            var user = users.FirstOrDefault(u => u.Id == id);
-            if (user == null)
-                return NotFound();
-            return user;
-        }
+        public IActionResult GetById(int id) =>
+            users.FirstOrDefault(u => u.Id == id) is User user ? Ok(user) : NotFound();
 
-        // POST: api/users
         [HttpPost]
-        public ActionResult<User> CreateUser([FromBody] User user)
+        public IActionResult Create(User user)
         {
-            if (user == null || string.IsNullOrEmpty(user.Name) || string.IsNullOrEmpty(user.Email))
-                return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            user.Id = nextId++;
+            user.Id = users.Count + 1;
             users.Add(user);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
         }
 
-        // PUT: api/users/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public IActionResult Update(int id, User updatedUser)
         {
-            if (user == null || string.IsNullOrEmpty(user.Name) || string.IsNullOrEmpty(user.Email))
-                return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var existingUser = users.FirstOrDefault(u => u.Id == id);
-            if (existingUser == null)
-                return NotFound();
+            var user = users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
 
-            existingUser.Name = user.Name;
-            existingUser.Email = user.Email;
+            user.Name = updatedUser.Name;
+            user.Email = updatedUser.Email;
+            user.Department = updatedUser.Department;
             return NoContent();
         }
 
-        // DELETE: api/users/{id}
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        public IActionResult Delete(int id)
         {
             var user = users.FirstOrDefault(u => u.Id == id);
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
+
             users.Remove(user);
             return NoContent();
         }
-    }
-
-    public class User
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
     }
 }
